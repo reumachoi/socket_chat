@@ -1,0 +1,23 @@
+{
+  "name": "socket_chat",
+  "version": "1.0.0",
+  "description": "socket.io practice work",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reumachoi/socket_chat.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/reumachoi/socket_chat/issues"
+  },
+  "homepage": "https://github.com/reumachoi/socket_chat#readme",
+  "dependencies": {
+    "express": "^4.18.1",
+    "socket.io": "^4.5.2"
+  }
+}
