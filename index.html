@@ -59,7 +59,8 @@
         width: 80%;
         height: 80%;
       }
-      h1 {
+      h1,
+      h2 {
         align-items: center;
         text-align: center;
       }
@@ -70,18 +71,26 @@
         height: 50px;
         position: fixed;
       }
+      .select {
+        text-align: center;
+      }
     </style>
   </head>
   <body>
     <div>
       <h1>Chat Room</h1>
+      <h2 id="room-name">room name</h2>
     </div>
-    <select>
-      <option value="0" selected>Room1</option>
-      <option value="1">Room2</option>
-      <option value="2">Room3</option>
-      <option value="3">Room4</option>
-    </select>
+    <div class="select">
+      <select id="selectBox" onchange="changeSelection()">
+        <option selected disabled>참여할 방 번호를 선택하세요</option>
+        <option>Room1</option>
+        <option>Room2</option>
+        <option>Room3</option>
+        <option>Room4</option>
+      </select>
+    </div>
+
     <div class="chat-wrapper">
       <ul id="messages"></ul>
       <form id="form" action="">
@@ -92,17 +101,17 @@
     <script src="/socket.io/socket.io.js"></script>
 
     <script>
+      let preJoinRoom = "";
+
       const name = prompt("what's your name");
 
       const socket = io();
 
-      if (name) {
-        socket.emit("new join", name);
-      }
-
       const messages = document.getElementById("messages");
       const form = document.getElementById("form");
       const input = document.getElementById("input");
+      const selectedElement = document.getElementById("selectBox");
+      const roomName = document.getElementById("room-name");
 
       form.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -128,6 +137,19 @@
         item.textContent = msg;
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
+      }
+
+      function changeSelection() {
+        let newJoinRoom =
+          selectedElement.options[selectedElement.selectedIndex].text;
+
+        roomName.textContent = newJoinRoom;
+
+        if (preJoinRoom !== newJoinRoom) {
+          socket.emit("new join room", preJoinRoom, newJoinRoom, name);
+        }
+
+        preJoinRoom = newJoinRoom;
       }
     </script>
   </body>
