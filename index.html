@@ -76,50 +76,59 @@
     <div>
       <h1>Chat Room</h1>
     </div>
-    <div>
-      <button onclick="namespace(1)">1번방</button>
-      <button onclick="namespace(2)">2번방</button>
-    </div>
+    <select>
+      <option value="0" selected>Room1</option>
+      <option value="1">Room2</option>
+      <option value="2">Room3</option>
+      <option value="3">Room4</option>
+    </select>
     <div class="chat-wrapper">
       <ul id="messages"></ul>
-
       <form id="form" action="">
         <input id="input" autocomplete="off" /><button>Send</button>
       </form>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
+
     <script>
-      var socket = io();
+      const name = prompt("what's your name");
 
-      socket.on("connect", () => {
-        var name = prompt("반갑습니다!", "");
+      const socket = io();
 
-        if (!name) {
-          name = "익명";
-        }
+      if (name) {
+        socket.emit("new join", name);
+      }
 
-        socket.emit("newJoin", name);
-      });
+      const messages = document.getElementById("messages");
+      const form = document.getElementById("form");
+      const input = document.getElementById("input");
 
-      var messages = document.getElementById("messages");
-      var form = document.getElementById("form");
-      var input = document.getElementById("input");
-
-      form.addEventListener("submit", function (e) {
+      form.addEventListener("submit", (e) => {
         e.preventDefault();
         if (input.value) {
-          socket.emit("message", input.value);
+          socket.emit("chat message", input.value);
           input.value = "";
         }
       });
 
-      socket.on("update", function (data) {
+      socket.on("notice", (name, msg) => {
+        const notice = "Notice : " + name + msg;
+        createNewMessage(notice);
+      });
+
+      socket.on("chat message", (name, msg) => {
+        const message = name + " : " + msg;
+        createNewMessage(message);
+      });
+
+      function createNewMessage(msg) {
         var item = document.createElement("li");
-        item.textContent = data.name + " : " + data.message;
+        console.log(msg);
+        item.textContent = msg;
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
-      });
+      }
     </script>
   </body>
 </html>
