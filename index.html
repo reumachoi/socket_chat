@@ -57,7 +57,6 @@
       .chat-wrapper {
         margin: 0 auto;
         width: 80%;
-        height: 80%;
       }
       h1,
       h2 {
@@ -80,6 +79,8 @@
     <div>
       <h1>Chat Room</h1>
       <h2 id="room-name">room name</h2>
+      <h2 id="user-num">chat user num :</h2>
+      <h2 id="user-list">chat user list :</h2>
     </div>
     <div class="select">
       <select id="selectBox" onchange="changeSelection()">
@@ -91,7 +92,7 @@
       </select>
     </div>
 
-    <div class="chat-wrapper">
+    <div class="chat-wrapper" id="chat-wrapper">
       <ul id="messages"></ul>
       <form id="form" action="">
         <input id="input" autocomplete="off" /><button>Send</button>
@@ -108,11 +109,13 @@
       const socket = io();
 
       const messages = document.getElementById("messages");
-      const item = document.createElement("li");
+
       const form = document.getElementById("form");
       const input = document.getElementById("input");
       const selectedElement = document.getElementById("selectBox");
       const roomName = document.getElementById("room-name");
+      const chatUserNum = document.getElementById("user-num");
+      const chatUserList = document.getElementById("user-list");
 
       // 메시지 입력 후 보내기
       form.addEventListener("submit", (e) => {
@@ -124,7 +127,9 @@
       });
 
       // 참여자 입출여부 공지
-      socket.on("notice", (name, msg) => {
+      socket.on("notice", (currentChatRoomUserList, userNum, name, msg) => {
+        chatUserNum.textContent = `chat user num : ${userNum}`;
+        chatUserList.textContent = `chat user list : ${currentChatRoomUserList}`;
         const notice = "Notice : " + name + msg;
         createNewMessage(notice);
       });
@@ -137,12 +142,12 @@
 
       // 메시지 새로 생성
       function createNewMessage(msg) {
+        const item = document.createElement("li");
         item.textContent = msg;
-
         messages.appendChild(item);
-        window.scrollTo(0, document.body.scrollHeight);
       }
 
+      // 채팅방 선택 및 변경
       function changeSelection() {
         // 선택한 채팅방 이름
         let newJoinRoom =
