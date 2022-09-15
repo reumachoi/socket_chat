@@ -1,7 +1,6 @@
 const express = require("express");
 const app = express();
 const http = require("http");
-const { user } = require("pg/lib/defaults");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
@@ -9,8 +8,6 @@ const io = new Server(server);
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
-
-const users = [];
 
 io.on("connection", (socket) => {
   socket.on("new join room", (preJoinRoom, newJoinRoom, name) => {
@@ -21,12 +18,7 @@ io.on("connection", (socket) => {
 
     let clients = io.sockets.adapter.rooms.get(newJoinRoom);
 
-    const roomClientsNum = clients ? clients.size : 0;
-
-    const currentChatRoomUserList = [];
-    clients.forEach((element) => {
-      currentChatRoomUserList.push(io.sockets.sockets.get(element).name);
-    });
+    const { currentChatRoomUserList, roomClientsNum } = getRoomInfo(clients);
 
     io.to(newJoinRoom).emit(
       "notice",
@@ -40,14 +32,7 @@ io.on("connection", (socket) => {
       socket.leave(preJoinRoom);
 
       let clients = io.sockets.adapter.rooms.get(preJoinRoom);
-      const roomClientsNum = clients ? clients.size : 0;
-
-      const currentChatRoomUserList = [];
-      if (clients) {
-        clients.forEach((element) => {
-          currentChatRoomUserList.push(io.sockets.sockets.get(element).name);
-        });
-      }
+      const { currentChatRoomUserList, roomClientsNum } = getRoomInfo(clients);
 
       io.to(preJoinRoom).emit(
         "notice",
@@ -65,14 +50,7 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     let clients = io.sockets.adapter.rooms.get(socket.room);
-    const roomClientsNum = clients ? clients.size : 0;
-
-    const currentChatRoomUserList = [];
-    if (clients) {
-      clients.forEach((element) => {
-        currentChatRoomUserList.push(io.sockets.sockets.get(element).name);
-      });
-    }
+    const { currentChatRoomUserList, roomClientsNum } = getRoomInfo(clients);
 
     io.emit(
       "notice",
@@ -87,3 +65,16 @@ io.on("connection", (socket) => {
 server.listen(3000, () => {
   console.log("listening on *:3000");
 });
+
+function getRoomInfo(clients) {
+  const roomClientsNum = clients ? clients.size : 0;
+
+  const currentChatRoomUserList = [];
+  if (clients) {
+    clients.forEach((element) => {
+      currentChatRoomUserList.push(io.sockets.sockets.get(element).name);
+    });
+  }
+
+  return { roomClientsNum, currentChatRoomUserList };
+}
